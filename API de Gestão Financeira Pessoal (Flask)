@@ -1,0 +1,44 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+usuarios = {}  # Simulando um banco de dados em memória
+
+@app.route('/despesa', methods=['POST'])
+def adicionar_despesa():
+    data = request.json
+    usuario = data['usuario']
+    valor = data['valor']
+    
+    if usuario not in usuarios:
+        usuarios[usuario] = {'despesas': [], 'receitas': []}
+    
+    usuarios[usuario]['despesas'].append(valor)
+    total_despesas = sum(usuarios[usuario]['despesas'])
+    return jsonify({'mensagem': 'Despesa adicionada', 'total_despesas': total_despesas})
+
+@app.route('/receita', methods=['POST'])
+def adicionar_receita():
+    data = request.json
+    usuario = data['usuario']
+    valor = data['valor']
+    
+    if usuario not in usuarios:
+        usuarios[usuario] = {'despesas': [], 'receitas': []}
+    
+    usuarios[usuario]['receitas'].append(valor)
+    total_receitas = sum(usuarios[usuario]['receitas'])
+    return jsonify({'mensagem': 'Receita adicionada', 'total_receitas': total_receitas})
+
+@app.route('/saldo/<usuario>', methods=['GET'])
+def saldo(usuario):
+    if usuario not in usuarios:
+        return jsonify({'mensagem': 'Usuário não encontrado!'}), 404
+    
+    total_despesas = sum(usuarios[usuario]['despesas'])
+    total_receitas = sum(usuarios[usuario]['receitas'])
+    saldo_atual = total_receitas - total_despesas
+    return jsonify({'saldo': saldo_atual})
+
+if __name__ == '__main__':
+    app.run(debug=True)
